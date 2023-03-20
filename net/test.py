@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from torchvision.utils import make_grid
 
 # abs=os.getcwd()+'/'
-abs = os.getcwd()+'\\'
+abs = os.getcwd()+'/'
 
 
 def tensorShow(tensors, titles=['haze']):
@@ -35,17 +35,17 @@ gps = 3
 blocks = 19
 
 # img_dir=abs+opt.test_imgs+'/'
-img_dir = abs+opt.test_imgs+'\\'
+img_dir = abs+opt.test_imgs+'/'
 
 # output_dir=abs+f'pred_FFA_{dataset}/'
-output_dir = abs+f'pred_FFA_{dataset}\\'
+output_dir = abs+f'pred_FFA_{dataset}/'
 
 print("pred_dir:", output_dir)
 if not os.path.exists(output_dir):
     os.mkdir(output_dir)
 
 # model_dir=abs+f'trained_models/{dataset}_train_ffa_{gps}_{blocks}.pk'
-model_dir = abs+f'trained_models\\{dataset}_train_ffa_{gps}_{blocks}.pk'
+model_dir = abs+f'trained_models/{dataset}_train_ffa_{gps}_{blocks}.pk'
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 ckp = torch.load(model_dir, map_location=device)
@@ -58,11 +58,12 @@ for im in os.listdir(img_dir):
     haze = Image.open(img_dir+im)
     haze1 = tfs.Compose([
         tfs.ToTensor(),
-        tfs.Normalize(mean=[0.64, 0.6, 0.58], std=[0.14, 0.15, 0.152])
+        # tfs.Normalize(mean=[0.64, 0.6, 0.58], std=[0.14, 0.15, 0.152])
+        # tfs.Normalize(mean=[0.0, 0.0, 0.0], std=[1.0, 1.0, 1.0])
     ])(haze)[None, ::]
     haze_no = tfs.ToTensor()(haze)[None, ::]
     with torch.no_grad():
         pred = net(haze1)
     ts = torch.squeeze(pred.clamp(0, 1).cpu())
     tensorShow([haze_no, pred.clamp(0, 1).cpu()], ['haze', 'pred'])
-    vutils.save_image(ts, output_dir+im.split('.')[0]+'_FFA.png')
+    vutils.save_image(ts, output_dir+im.split('.')[0]+'_FFA_no_trans.png')
